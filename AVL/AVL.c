@@ -8,23 +8,28 @@ typedef struct node {
     struct node *left, *right;
 }No;
 
+No *createNo(int x);
 void insertAVL(No **root, int *h, int x);
-No *createNO(int x);
+No *deleteAVL(No *root, int *i, int x);
+int auxDeleteAVL(No *root);
 void caso1(No **root);
 void caso2(No **root);
 
 int main(void){
     int *h = (int*)malloc(sizeof(int));
     *h = 0; //true
+    int *i = (int*)malloc(sizeof(int));
+    *i = 0; //true
     No *root = NULL;
+
     insertAVL(&root, h, 50);
-    printf("\nadd: %d", root->chave);
-
     insertAVL(&root, h, 60);
-    printf("\nadd: %d", root->right->chave);
-
     insertAVL(&root, h, 40);
-    printf("\nadd: %d", root->left->chave);
+    insertAVL(&root, h, 70);
+    insertAVL(&root, h, 30);
+    insertAVL(&root, h, 45);
+
+    root = deleteAVL(root, i, 40);
 
     return 0;
 }
@@ -94,6 +99,108 @@ void insertAVL(No **root, int *h, int x){
         }
     }
 
+}
+
+
+No *deleteAVL(No *root, int *i, int x){
+/*aqui deveremos tomar cuidado para os 4 possíveis casos:
+1 - elemento não tem filhos (nó folha)
+2 - elemento possui apenas filhos a esquerda
+3 - elemento possui apenas filhos a direita
+4 - elemento possui filho a esquerda e a direita*/
+    No *aux, *aux2;
+
+    //caso trivial
+    if(root == NULL){//valor não existe
+        printf("\nthe value not exist.");
+
+        return NULL;
+    }else{
+        //valor encontrado
+        if(root->chave == x){
+
+                //caso 1: nó folha
+                if(root->left == NULL && root->right == NULL){
+                    free(root);
+                    return NULL;
+                }else if(root->left != NULL && root->right == NULL){ //caso 2: filho apenas à esquerda
+                    aux = root->left;
+                    free(root);
+                    return aux;
+                }else if(root->left == NULL && root->right != NULL){//caso 3: filho apenas à direita
+                    aux = root->right;
+                    free(root);
+                    return aux;
+                }else{
+                    /*aqui baster pegarmos o maior elemento da esquerda ou,
+                    o menor elemento da direita*/
+
+                    //ou seja, esse elemento sempre será folha.
+                    int x = auxDeleteAVL(root->right);
+                    No *ptr = createNo(x); //criei um novo elemento
+
+                    //agora basta remover o verdadeiro elemento da lista
+                    root = deleteAVL(root, i, x);
+
+                    aux  = root->left;
+                    aux2 = root->right;
+                    free(root);
+                    ptr->left = aux;
+                    ptr->right = aux2;
+                    return ptr;
+                }
+        }else{ //valor ainda não foi encontrado
+            //subárvore esquerda
+            if(root->chave > x){
+                root->left = deleteAVL(root->left, i, x);
+                if(*i == 0){
+                    switch(root->bal){
+                        case -1:
+                            caso2(&root);
+                            *i = 1;
+                            break;
+                        case 0:
+                            root->bal = -1;
+                            break;
+                        case 1:
+                            root->bal = 0;
+                            break;
+                    }
+                }
+            }
+            //subárvore direita
+            else{
+                root->right = deleteAVL(root->right, i, x);
+                if(*i == 0){
+                    switch(root->bal){
+                        case -1:
+                            root->bal = 0;
+                            break;
+                        case 0:
+                            root->bal = 1;
+                            break;
+                        case 1:
+                            caso1(&root);
+                            *i = 1;
+                            break;
+                    }
+                }
+            }
+        }
+        }
+}
+
+
+
+int auxDeleteAVL(No *root){
+    No *aux = root;
+    if(root != NULL){
+       while(aux->left != NULL){
+            aux = aux->left;
+       }
+       return aux->chave;
+    }
+    return -1;
 }
 
 void caso1(No **root){

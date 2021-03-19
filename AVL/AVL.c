@@ -8,27 +8,24 @@ typedef struct node {
     struct node *left, *right;
 }No;
 
-void insertAVL(No **root, bool h, int x); ///h precisa ser ponteiro?
+void insertAVL(No **root, int *h, int x);
 No *createNO(int x);
-void caso1(No **root, bool h);
-void caso2(No **root, bool h);
+void caso1(No **root);
+void caso2(No **root);
 
 int main(void){
+    int *h = (int*)malloc(sizeof(int));
+    *h = 0; //true
     No *root = NULL;
-    insertAVL(&root, true, 50);
-    printf("1: %d", root->chave);
+    insertAVL(&root, h, 50);
+    printf("\nadd: %d", root->chave);
 
-    insertAVL(&root, true, 100);
-    printf("\n2: %d", root->right->chave);
+    insertAVL(&root, h, 60);
+    printf("\nadd: %d", root->right->chave);
 
-    insertAVL(&root, true, 25);
-    printf("\n3: %d", root->left->chave);
+    insertAVL(&root, h, 40);
+    printf("\nadd: %d", root->left->chave);
 
-    insertAVL(&root, true, 20);
-    printf("\n4: %d", root->left->left->chave);
-
-    insertAVL(&root, true, 10);
-    printf("\n5: %d", root->left->chave);
     return 0;
 }
 
@@ -44,7 +41,7 @@ No *createNo(int x){
     return NULL;
 }
 
-void insertAVL(No **root, bool h, int x){
+void insertAVL(No **root, int *h, int x){
     //raiz vazia ou nó folha
     if(*root == NULL){
         *root = createNo(x);
@@ -57,19 +54,18 @@ void insertAVL(No **root, bool h, int x){
         //caminho à esquerda (left patch)
         if(x < (*root)->chave){
             insertAVL(&(*root)->left, h, x);
-
             //considerações de balanceamento
-            if(h){
+            if(*h == 0){
                 switch((*root)->bal){
                     case -1:
                         (*root)->bal = 0;
-                        h = false;
                         break;
                     case 0:
                         (*root)->bal = 1;
                         break;
                     case 1:
-                        caso1(root, h);
+                        caso1(root);
+                        *h = 1;
                         break;
                 }
             }
@@ -80,17 +76,18 @@ void insertAVL(No **root, bool h, int x){
             insertAVL(&(*root)->right, h, x);
 
             //considerações de balanceamento
-            if(h){
+            if(*h == 0){
                 switch((*root)->bal){
                     case 1:
                         (*root)->bal = 0;
-                        h = false;
+                        *h = 1;
                         break;
                     case 0:
                         (*root)->bal = -1;
                         break;
                     case -1:
-                        caso2(root, h);
+                        caso2(root);
+                        *h = 1;
                         break;
                 }
             }
@@ -99,7 +96,7 @@ void insertAVL(No **root, bool h, int x){
 
 }
 
-void caso1(No **root, bool h){
+void caso1(No **root){
     No *u = (*root)->left;
     No *z;
 
@@ -130,11 +127,12 @@ void caso1(No **root, bool h){
         else u->bal = 0;
         (*root) = z;
     }
+
+    //zerando o bal de u
     (*root)->bal = 0;
-    h = false;
 }
 
-void caso2(No **root, bool h){
+void caso2(No **root){
     No *u, *z;
 
     u = (*root)->right;
@@ -167,7 +165,6 @@ void caso2(No **root, bool h){
         (*root) = z;
     }
     (*root)->bal = 0;
-    h = false;
 }
 
 

@@ -1,38 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
-typedef struct node {
-    int chave;
-    int bal;
-    struct node *left, *right;
-}No;
-
-No *createNo(int x);
-void insertAVL(No **root, int *h, int x);
-No *deleteAVL(No *root, int *i, int x);
-int auxDeleteAVL(No *root);
-void caso1(No **root);
-void caso2(No **root);
-
-int main(void){
-    int *h = (int*)malloc(sizeof(int));
-    *h = 0; //true
-    int *i = (int*)malloc(sizeof(int));
-    *i = 0; //true
-    No *root = NULL;
-
-    insertAVL(&root, h, 50);
-    insertAVL(&root, h, 60);
-    insertAVL(&root, h, 40);
-    insertAVL(&root, h, 70);
-    insertAVL(&root, h, 30);
-    insertAVL(&root, h, 45);
-
-    root = deleteAVL(root, i, 40);
-
-    return 0;
-}
+#include "AVL.h"
 
 No *createNo(int x){
     No *root = NULL;
@@ -49,21 +18,28 @@ No *createNo(int x){
 void insertAVL(No **root, int *h, int x){
     //raiz vazia ou nó folha
     if(*root == NULL){
+        printf("\nnull");
         *root = createNo(x);
         return;
     }
     else{
         //nó já existe
-        if(x == (*root)->chave) return;
-
+        if(x == (*root)->chave){
+            printf("\nja existe");
+            *h = 1;
+            return;
+        }
         //caminho à esquerda (left patch)
         if(x < (*root)->chave){
+            printf("\nleft %d", *h);
             insertAVL(&(*root)->left, h, x);
+
             //considerações de balanceamento
             if(*h == 0){
                 switch((*root)->bal){
                     case -1:
                         (*root)->bal = 0;
+                        *h = 0;
                         break;
                     case 0:
                         (*root)->bal = 1;
@@ -78,6 +54,7 @@ void insertAVL(No **root, int *h, int x){
 
         //caminho à direita (right patch)
         else{
+            printf("\nright");
             insertAVL(&(*root)->right, h, x);
 
             //considerações de balanceamento
@@ -98,9 +75,7 @@ void insertAVL(No **root, int *h, int x){
             }
         }
     }
-
 }
-
 
 No *deleteAVL(No *root, int *i, int x){
 /*aqui deveremos tomar cuidado para os 4 possíveis casos:
@@ -113,7 +88,7 @@ No *deleteAVL(No *root, int *i, int x){
     //caso trivial
     if(root == NULL){//valor não existe
         printf("\nthe value not exist.");
-
+        *i = 1;
         return NULL;
     }else{
         //valor encontrado
@@ -121,17 +96,21 @@ No *deleteAVL(No *root, int *i, int x){
 
                 //caso 1: nó folha
                 if(root->left == NULL && root->right == NULL){
+                    printf("\nno folha");
                     free(root);
                     return NULL;
                 }else if(root->left != NULL && root->right == NULL){ //caso 2: filho apenas à esquerda
+                    printf("\nfilhos apenas a esquerda");
                     aux = root->left;
                     free(root);
                     return aux;
                 }else if(root->left == NULL && root->right != NULL){//caso 3: filho apenas à direita
+                    printf("\nfilhos apenas a direita");
                     aux = root->right;
                     free(root);
                     return aux;
                 }else{
+                    printf("\nfilhos a esquerda e direita");
                     /*aqui baster pegarmos o maior elemento da esquerda ou,
                     o menor elemento da direita*/
 
@@ -171,10 +150,11 @@ No *deleteAVL(No *root, int *i, int x){
             //subárvore direita
             else{
                 root->right = deleteAVL(root->right, i, x);
-                if(*i == 0){
+                if(i){
                     switch(root->bal){
                         case -1:
                             root->bal = 0;
+                            *i = 1;
                             break;
                         case 0:
                             root->bal = 1;
@@ -187,10 +167,8 @@ No *deleteAVL(No *root, int *i, int x){
                 }
             }
         }
-        }
+    }
 }
-
-
 
 int auxDeleteAVL(No *root){
     No *aux = root;
@@ -234,8 +212,6 @@ void caso1(No **root){
         else u->bal = 0;
         (*root) = z;
     }
-
-    //zerando o bal de u
     (*root)->bal = 0;
 }
 
@@ -274,94 +250,19 @@ void caso2(No **root){
     (*root)->bal = 0;
 }
 
+No *searchAVL(No *root, int x){
 
+    if(!root) return NULL;
 
+    if(root->chave == x) return root;
+    else if(root->chave > x) return searchAVL(root->left, x);
+    else return searchAVL(root->right, x);
+}
 
+void printAVL(No *root){
+	if(!root) return;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    printAVL(root->left);
+    printf(" %d", root->chave);
+    printAVL(root->right);
+}

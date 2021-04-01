@@ -1,8 +1,26 @@
+//autor: Jeferson Luiz Alves de Souza
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "AVL.h"
+#include "testeH.h"
 
+int comparaChaves(void* chave1, void* chave2){
+    if (*(int*)chave1 > *(int*)chave2)
+        return 1;
+    else if (*(int*)chave1 < *(int*)chave2)
+        return -1;
+    else
+        return 0;
+}
+void printaChave(No *root){
+    printf("%d\n", *(int*)root->chave);
+}
+int *alocaInt(){
+    int* a = NULL;
+    a = (int*) malloc(sizeof(int));
+    scanf("%d", a);
+    return a;
+}
 int main(void){
     int *h = (int*)malloc(sizeof(int));
     *h = 0; //true
@@ -11,7 +29,7 @@ int main(void){
     No *root = NULL;
     No *aux = NULL;
     int answer = 1;
-    int x;
+    int *x;
 
     while(answer){
         system("cls");
@@ -26,7 +44,7 @@ int main(void){
         switch(answer){
             case 1:
                 printf("\nelemento a inserir: ");
-                scanf("%d", &x);
+                x = alocaInt();
                 insertAVL(&root, h, x);
                 printf("\n");
                 system("pause");
@@ -34,7 +52,7 @@ int main(void){
                 continue;
             case 2:
                 printf("\nelemento a remover: ");
-                scanf("%d", &x);
+                x = alocaInt();
                 root = deleteAVL(root, i, x);
                 printf("\n");
                 system("pause");
@@ -42,17 +60,27 @@ int main(void){
                 continue;
             case 3:
                 printf("\nelemento a buscar: ");
-                scanf("%d", &x);
+                x = alocaInt();
                 aux = searchAVL(root, x);
-                printf("chave           : %d", aux->chave);
-                printf("\nbalanceamento   : %d", aux->bal);
-                if(aux->left)printf("\nfilho a esquerda: %d", aux->left->chave);
-                if(aux->right)printf("\nfilho a direita : %d", aux->right->chave);
-                printf("\n");
+                if(aux){
+                    printf("\nchave           : ");
+                    printaChave(aux);
+                    printf("\nbalanceamento   : %d\n", aux->bal);
+                    if(aux->left){
+                        printf("\nfilho a esquerda: ");
+                        printaChave(aux->left);
+                    }
+                    if(aux->right){
+                        printf("\nfilho a direita : ");
+                        printaChave(aux->right);
+                    }
+                }else printf("elemento nao existe");
+
+                printf("\n\n");
                 system("pause");
                 continue;
             case 4:
-                printAVL(root);
+                printAVL(root, 0);
                 printf("\n");
                 system("pause");
                 continue;
